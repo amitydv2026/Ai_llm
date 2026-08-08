@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My_LLM — AI Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ─── Sidebar ─────────────────────────── -->
+  <aside class="sidebar" id="sidebar" aria-label="Conversations">
+
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🤖</div>
+        <span class="sidebar-logo-text">My_LLM</span>
+      </div>
+    </div>
+
+    <!-- New chat button -->
+    <button class="btn-new-chat" id="btnNewChat" aria-label="New conversation">
+      <span>＋</span> New Chat
+    </button>
+
+    <!-- Conversation list -->
+    <div class="conversations-list" id="convList" role="list">
+      <div style="padding: 1rem 0.75rem; color: var(--text-muted); font-size: 0.8rem;">
+        Loading…
+      </div>
+    </div>
+
+    <!-- User info / logout -->
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-details">
+          <div class="user-name"  id="userName">User</div>
+          <div class="user-email" id="userEmail"></div>
+        </div>
+        <button class="btn-logout" id="btnLogout" title="Sign out" aria-label="Sign out">
+          ⏻
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+  <!-- ─── Main Chat ─────────────────────────── -->
+  <main class="chat-main">
+
+    <!-- Header -->
+    <header class="chat-header">
+      <button class="btn-sidebar-toggle" id="btnToggleSidebar" aria-label="Toggle sidebar">
+        ☰
+      </button>
+      <span class="chat-title" id="chatTitle">My_LLM</span>
+      <span id="modeBadge" class="mode-badge text-mode">💬 Text</span>
+      
+    </header>
+
+    <!-- Messages -->
+    <div class="messages-container" id="messages" role="log" aria-live="polite" aria-label="Conversation messages">
+
+      <!-- Empty / Welcome state -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-state-icon">🤖</div>
+        <h2 class="empty-state-title">How can I help you today?</h2>
+        <p class="empty-state-subtitle">
+          Ask me anything — code, writing, analysis, images. I'm here to help.
+        </p>
+        <div class="suggestion-chips">
+          <!-- 🤖 AI & Tech -->
+          <button class="suggestion-chip" data-prompt="What are the biggest AI breakthroughs expected in 2026?">
+            🤖 AI Breakthroughs 2026
+          </button>
+          <button class="suggestion-chip" data-prompt="How is Agentic AI changing the way we work in 2026?">
+            🧠 Agentic AI & Work
+          </button>
+
+          <!-- 💻 Programming -->
+          <button class="suggestion-chip" data-prompt="What are the top programming languages and frameworks to learn in 2026?">
+            💻 Top Languages 2026
+          </button>
+          <button class="suggestion-chip" data-prompt="What is vibe coding and how is it changing software development?">
+            🎯 Vibe Coding Trend
+          </button>
+
+          <!-- 🌍 Climate & Science -->
+          <button class="suggestion-chip" data-prompt="How is technology helping fight climate change in 2026?">
+            🌍 Tech vs Climate Change
+          </button>
+          <button class="suggestion-chip" data-prompt="What are the latest breakthroughs in space exploration in 2026?">
+            🚀 Space Exploration 2026
+          </button>
+
+          <!-- 💰 Business & Finance -->
+          <button class="suggestion-chip" data-prompt="What are the hottest startup sectors to invest in 2026?">
+            � Hot Startup Sectors
+          </button>
+          <button class="suggestion-chip" data-prompt="How is AI changing the finance and banking industry in 2026?">
+            🏦 AI in Banking 2026
+          </button>
+
+          <!-- 🏥 Health -->
+          <button class="suggestion-chip" data-prompt="What are the biggest medical and health tech innovations of 2026?">
+            🏥 Health Tech Innovations
+          </button>
+          <button class="suggestion-chip" data-prompt="How is AI being used in drug discovery and healthcare in 2026?">
+            � AI in Drug Discovery
+          </button>
+
+          <!-- 🎮 Gaming & Entertainment -->
+          <button class="suggestion-chip" data-prompt="How is AI transforming the gaming industry in 2026?">
+            🎮 AI in Gaming 2026
+          </button>
+          <button class="suggestion-chip" data-prompt="What are the biggest trends in the creator economy in 2026?">
+            🎬 Creator Economy 2026
+          </button>
+
+          <!-- 🔐 Security -->
+          <button class="suggestion-chip" data-prompt="What are the biggest cybersecurity threats in 2026?">
+            � Cybersecurity Threats
+          </button>
+          <button class="suggestion-chip" data-prompt="How is quantum computing affecting encryption and security in 2026?">
+            ⚛️ Quantum & Encryption
+          </button>
+
+          <!-- 🎓 Education -->
+          <button class="suggestion-chip" data-prompt="How is AI changing education and learning in 2026?">
+            🎓 AI in Education
+          </button>
+          <button class="suggestion-chip" data-prompt="What are the most valuable skills to learn in 2026?">
+            � Most Valuable Skills 2026
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+      <div class="chat-input-wrapper">
+
+        <!-- Tool buttons -->
+        <div class="chat-input-tools">
+          <label class="image-mode-toggle" title="Generate image instead of text">
+            <input type="checkbox" id="btnToggleImage" />
+            <span class="image-mode-label">🖼 Image</span>
+          </label>
+        </div>
+
+        <!-- Text input -->
+        <textarea
+          id="chatInput"
+          class="chat-textarea"
+          placeholder="Ask anything…"
+          rows="1"
+          aria-label="Message input"
+          autocomplete="off"
+          spellcheck="true"
+        ></textarea>
+
+        <!-- Stop button (shown during generation) -->
+        <button class="btn-stop" id="stopBtn" aria-label="Stop generation">
+          ⏹ Stop
+        </button>
+
+        <!-- Send button -->
+        <button class="btn-send" id="sendBtn" disabled aria-label="Send message">
+          ➤
+        </button>
+
+      </div>
+
+      <p class="chat-input-footer">
+      <b> Developer Team - Amit Yadav,Abhi Deware,Vaishali Deware</b><br>
+        <span>Generated output may be incorrect</span>
+      </p>
+    </div>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/chat.js"></script>
+<script>
+  // Bootstrap the app
+  document.addEventListener("DOMContentLoaded", initChat);
+</script>
+
+</body>
+</html>

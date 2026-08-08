@@ -1,0 +1,162 @@
+/* ─────────────────────────────────────────────
+   My_LLM — Responsive Styles
+   ───────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════
+   LARGE DESKTOP (> 1400px)
+   ════════════════════════════════════════════ */
+@media (min-width: 1400px) {
+  :root { --sidebar-width: 280px; }
+
+  .messages-container { padding: 2.5rem 2rem 1rem; }
+
+  .message { max-width: 960px; }
+
+  .chat-input-wrapper { max-width: 960px; }
+  .chat-input-footer   { max-width: 960px; }
+}
+
+/* ════════════════════════════════════════════
+   TABLET LANDSCAPE (901px – 1199px)
+   ════════════════════════════════════════════ */
+@media (max-width: 1199px) {
+  :root { --sidebar-width: 240px; }
+}
+
+/* ════════════════════════════════════════════
+   TABLET PORTRAIT (641px – 900px)
+   ════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  :root { --sidebar-width: 220px; }
+
+  .chat-model-badge { display: none; }
+
+  .messages-container {
+    padding: 1.5rem 0.75rem 1rem;
+    gap: 1.25rem;
+  }
+
+  .chat-input-area { padding: 0.75rem; }
+}
+
+/* ════════════════════════════════════════════
+   MOBILE (≤ 640px)
+   ════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  :root { --sidebar-width: min(80vw, 300px); }
+
+  /* ── Sidebar becomes a slide-over overlay ── */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+    min-width: unset !important;
+    box-shadow: 4px 0 32px rgba(0,0,0,0.6);
+    z-index: 200;
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  /* Dim overlay when sidebar is open */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 199;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .sidebar-overlay.visible { display: block; }
+
+  /* Hide model badge */
+  .chat-model-badge { display: none; }
+  .mode-badge { display: none; }
+
+  /* Messages */
+  .messages-container {
+    padding: 1rem 0.5rem 0.5rem;
+    gap: 1rem;
+  }
+
+  .message { gap: 0.6rem; }
+
+  .message-avatar { width: 28px; height: 28px; font-size: 0.75rem; }
+
+  .message.user .message-content {
+    max-width: 88%;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.875rem;
+  }
+
+  .message.assistant .message-content {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.875rem;
+  }
+
+  /* Input */
+  .chat-input-area { padding: 0.6rem 0.5rem 0.5rem; }
+
+  .chat-input-wrapper { border-radius: var(--radius-lg); }
+
+  .chat-textarea { font-size: 0.9rem; }
+
+  /* Header */
+  .chat-header {
+    padding: 0 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .chat-title { font-size: 0.875rem; }
+
+  /* Welcome state */
+  .empty-state { padding: 1.5rem 1rem; gap: 0.875rem; }
+  .empty-state-icon { width: 56px; height: 56px; font-size: 1.5rem; }
+  .empty-state-title { font-size: 1.2rem; }
+  .empty-state-subtitle { font-size: 0.83rem; }
+
+  .suggestion-chips { gap: 0.4rem; }
+  .suggestion-chip { font-size: 0.78rem; padding: 0.38rem 0.75rem; }
+
+  /* Auth page */
+  .auth-card { padding: 2rem 1.25rem; }
+  .auth-title { font-size: 1.3rem; }
+}
+
+/* ════════════════════════════════════════════
+   VERY SMALL PHONES (≤ 380px)
+   ════════════════════════════════════════════ */
+@media (max-width: 380px) {
+  :root { --sidebar-width: 90vw; }
+
+  .message.user .message-content { max-width: 94%; }
+
+  .chat-textarea { font-size: 0.85rem; }
+
+  .auth-card { padding: 1.75rem 1rem; }
+}
+
+/* ════════════════════════════════════════════
+   DESKTOP: sidebar toggle always visible
+   ════════════════════════════════════════════ */
+@media (min-width: 641px) {
+  /* Never show mobile overlay on desktop */
+  .sidebar-overlay { display: none !important; }
+
+  /* Sidebar transition for collapse */
+  .sidebar { transition: width 0.3s cubic-bezier(0.4,0,0.2,1),
+                         min-width 0.3s cubic-bezier(0.4,0,0.2,1); }
+}
+
+/* ════════════════════════════════════════════
+   PRINT
+   ════════════════════════════════════════════ */
+@media print {
+  .sidebar, .chat-header, .chat-input-area { display: none; }
+  .messages-container { padding: 0; overflow: visible; }
+  .message { break-inside: avoid; }
+}
