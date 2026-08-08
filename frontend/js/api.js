@@ -9,7 +9,7 @@
 const IS_PROD = window.location.hostname !== "127.0.0.1" && window.location.hostname !== "localhost";
 
 const API_BASE = IS_PROD
-  ? "https://my-llm-backend.onrender.com"   // ← replace with your actual Render URL after deploy
+  ? "https://ai-llm-tcsk.onrender.com"   // ← replace with your actual Render URL after deploy
   : "http://127.0.0.1:8000";
 async function request(method, path, body = null, stream = false) {
   const token = localStorage.getItem("my_llm_token");
