@@ -45,7 +45,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         # GitHub Pages — replace YOUR_USERNAME with your GitHub username
-        "https://YOUR_USERNAME.github.io",
+        "https://amitydv2026.github.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
