@@ -14,7 +14,7 @@ def _parse_supabase_error(e: Exception) -> str:
     msg = str(e).lower()
 
     if "rate limit" in msg or "email rate" in msg:
-        return "Too many attempts. Please wait a few minutes and try again."
+        return "Signup limit reached for this email provider. Please use a different email address (Gmail, Outlook, etc.) or wait 1 hour."
     if "user already registered" in msg or "already been registered" in msg:
         return "An account with this email already exists. Please sign in."
     if "invalid login credentials" in msg or "invalid email or password" in msg:
