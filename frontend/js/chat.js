@@ -252,7 +252,7 @@ async function openConversation(id, title) {
     if (msgs.length === 0) {
       showEmptyState(true);
     } else {
-      msgs.forEach((msg) => appendMessage(msg.role, msg.content, false));
+      msgs.forEach((msg) => appendMessage(msg.role, msg.content, false, msg.created_at));
       scrollToBottom(messagesEl, false);
     }
   } catch (err) {
@@ -339,7 +339,7 @@ function showEmptyState(show = true) {
   emptyState.style.display = show ? "flex" : "none";
 }
 
-function appendMessage(role, content, animate = true) {
+function appendMessage(role, content, animate = true, createdAt = null) {
   showEmptyState(false);
 
   const isUser = role === "user";
@@ -443,7 +443,7 @@ function appendMessage(role, content, animate = true) {
 
   // ── Metadata bar: device name (left) + India time (right) ──
   if (!isUser) {
-    body.appendChild(buildMessageMeta());
+    body.appendChild(buildMessageMeta(createdAt));
   }
 
   msg.appendChild(avatar);

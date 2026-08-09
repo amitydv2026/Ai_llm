@@ -236,9 +236,10 @@ function getDeviceName() {
   return "🌐 Unknown Device";
 }
 
-function getIndiaTime() {
-  const now = new Date();
-  return now.toLocaleString("en-IN", {
+function getIndiaTime(timestamp = null) {
+  // Use provided timestamp (from DB) or current time (for live responses)
+  const date = timestamp ? new Date(timestamp) : new Date();
+  return date.toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
     day:    "2-digit",
     month:  "short",
@@ -249,7 +250,7 @@ function getIndiaTime() {
   });
 }
 
-function buildMessageMeta() {
+function buildMessageMeta(timestamp = null) {
   const meta = createElement("div", { className: "message-meta" });
 
   const device = createElement("span", {
@@ -259,7 +260,7 @@ function buildMessageMeta() {
 
   const time = createElement("span", {
     className: "message-meta-time",
-    textContent: getIndiaTime(),
+    textContent: getIndiaTime(timestamp),
   });
 
   meta.appendChild(device);
