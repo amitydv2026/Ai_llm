@@ -175,6 +175,9 @@ function initSignupPage() {
     if (!email) {
       showFieldError("email", "Email is required");
       valid = false;
+    } else if (/getemail|tempmail|mailinator|guerrillamail|throwam|yopmail|sharklasers|trashmail|maildrop|fakeinbox|spamgourmet/i.test(email)) {
+      showFieldError("email", "Please use a real email address (Gmail, Outlook, etc.)");
+      valid = false;
     }
     if (!password || password.length < 8) {
       showFieldError("password", "Password must be at least 8 characters");

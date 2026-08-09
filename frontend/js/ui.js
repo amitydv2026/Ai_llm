@@ -193,6 +193,81 @@ function scrollToBottom(container, smooth = true) {
 }
 
 // ─────────────────────────────────────────────
+// Message metadata: device + India time
+// ─────────────────────────────────────────────
+
+function getDeviceName() {
+  const ua = navigator.userAgent;
+
+  // ── Mobile devices ──
+  if (/iPhone/.test(ua)) {
+    const match = ua.match(/iPhone OS ([\d_]+)/);
+    const ver = match ? " (iOS " + match[1].replace(/_/g, ".") + ")" : "";
+    return "📱 iPhone" + ver;
+  }
+  if (/iPad/.test(ua)) return "📱 iPad";
+  if (/Samsung|SM-[A-Z]/i.test(ua)) {
+    const match = ua.match(/SM-([A-Z0-9]+)/i);
+    return "📱 Samsung " + (match ? match[1] : "Galaxy");
+  }
+  if (/Pixel (\d+)/i.test(ua)) {
+    const match = ua.match(/Pixel (\d+\s?[a-z]*)/i);
+    return "📱 Google Pixel " + (match ? match[1] : "");
+  }
+  if (/OnePlus/i.test(ua)) return "📱 OnePlus";
+  if (/Xiaomi|Redmi|MIUI/i.test(ua)) return "📱 Xiaomi";
+  if (/Huawei/i.test(ua)) return "📱 Huawei";
+  if (/OPPO/i.test(ua)) return "📱 OPPO";
+  if (/Vivo/i.test(ua)) return "📱 Vivo";
+  if (/Realme/i.test(ua)) return "📱 Realme";
+  if (/Android/.test(ua)) return "📱 Android";
+
+  // ── Desktop OS ──
+  if (/Macintosh|Mac OS X/.test(ua)) {
+    if (/Chrome/.test(ua)) return "💻 Mac (Chrome)";
+    if (/Safari/.test(ua)) return "💻 Mac (Safari)";
+    return "💻 MacBook";
+  }
+  if (/Windows NT 10/.test(ua)) return "🖥️ Windows 10/11";
+  if (/Windows NT/.test(ua)) return "🖥️ Windows";
+  if (/Linux/.test(ua)) return "🖥️ Linux";
+  if (/CrOS/.test(ua)) return "💻 Chromebook";
+
+  return "🌐 Unknown Device";
+}
+
+function getIndiaTime() {
+  const now = new Date();
+  return now.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day:    "2-digit",
+    month:  "short",
+    year:   "numeric",
+    hour:   "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function buildMessageMeta() {
+  const meta = createElement("div", { className: "message-meta" });
+
+  const device = createElement("span", {
+    className: "message-meta-device",
+    textContent: getDeviceName(),
+  });
+
+  const time = createElement("span", {
+    className: "message-meta-time",
+    textContent: getIndiaTime(),
+  });
+
+  meta.appendChild(device);
+  meta.appendChild(time);
+  return meta;
+}
+
+// ─────────────────────────────────────────────
 // Format relative date (for sidebar groups)
 // ─────────────────────────────────────────────
 

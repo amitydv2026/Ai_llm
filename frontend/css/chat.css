@@ -914,8 +914,33 @@
   box-shadow: 0 0 0 2px var(--accent-light);
 }
 
+/* ── Message metadata bar ── */
+.message-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.4rem;
+  padding: 0 0.1rem;
+  gap: 0.5rem;
+}
+
+.message-meta-device {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+}
+
+.message-meta-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ── Toast container (defined in ui.js but styled here) ── */
-.toast-container {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;

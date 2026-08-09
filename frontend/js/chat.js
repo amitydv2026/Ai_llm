@@ -441,6 +441,11 @@ function appendMessage(role, content, animate = true) {
     body.appendChild(actions);
   }
 
+  // ── Metadata bar: device name (left) + India time (right) ──
+  if (!isUser) {
+    body.appendChild(buildMessageMeta());
+  }
+
   msg.appendChild(avatar);
   msg.appendChild(body);
   messagesEl.appendChild(msg);
