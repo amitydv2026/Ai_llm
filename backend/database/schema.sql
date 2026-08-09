@@ -128,3 +128,69 @@ DROP TRIGGER IF EXISTS on_message_inserted ON public.messages;
 CREATE TRIGGER on_message_inserted
     AFTER INSERT ON public.messages
     FOR EACH ROW EXECUTE FUNCTION public.update_conversation_timestamp();
+
+
+-- ─────────────────────────────────────────────
+-- ADMIN ROLES
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─────────────────────────────────────────────
+-- USER ACTIVITY LOG
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.activity_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    action TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}',
+    ip_address TEXT,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
+
+-- Only admins can read admin_users table (via service role in backend)
+-- activity_logs readable only via service role (admin API)
+
+-- ─────────────────────────────────────────────
+-- ADMIN: Helper function
+-- ─────────────────────────────────────────────
+
+-- Returns true if the given user_id is in admin_users
+CREATE OR REPLACE FUNCTION public.is_admin(user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.admin_users WHERE id = user_id
+    );
+$$;
+
+-- ─────────────────────────────────────────────
+-- ADMIN: RLS policies
+-- ─────────────────────────────────────────────
+
+-- Only admins can read the admin_users table (direct Supabase queries)
+-- Backend uses service role key which bypasses RLS entirely.
+CREATE POLICY "admin_users_select_admin_only" ON public.admin_users
+    FOR SELECT USING (public.is_admin(auth.uid()));
+
+-- Activity logs: admins can read; nobody can insert directly via Supabase (backend only)
+CREATE POLICY "activity_logs_select_admin_only" ON public.activity_logs
+    FOR SELECT USING (public.is_admin(auth.uid()));
+
+-- ─────────────────────────────────────────────
+-- SEED: First admin
+-- Replace the email below with your admin email, then run in SQL editor.
+-- ─────────────────────────────────────────────
+-- INSERT INTO public.admin_users (id)
+-- SELECT id FROM public.profiles WHERE email = 'your_admin_email@example.com'
+-- ON CONFLICT (id) DO NOTHING;

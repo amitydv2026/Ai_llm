@@ -1,11 +1,12 @@
 """
-Shared FastAPI dependencies — primarily JWT-based auth guard.
+Shared FastAPI dependencies — JWT auth guard and admin role check.
 """
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from services.auth_service import verify_token, get_user_profile
 from schemas.auth import UserProfile
+from database.supabase import get_supabase_admin
 
 bearer_scheme = HTTPBearer()
 
@@ -44,3 +45,26 @@ def get_current_user(
         )
 
     return user
+
+
+def get_admin_user(
+    current_user: UserProfile = Depends(get_current_user),
+) -> UserProfile:
+    """
+    Dependency that checks whether the current authenticated user is an admin.
+    Uses the service-role Supabase client to bypass RLS and query admin_users.
+    Raises HTTP 403 if the user is not in the admin_users table.
+    """
+    client = get_supabase_admin()
+    result = (
+        client.table("admin_users")
+        .select("id")
+        .eq("id", current_user.id)
+        .execute()
+    )
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required.",
+        )
+    return current_user

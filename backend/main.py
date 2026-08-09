@@ -10,6 +10,8 @@ from pathlib import Path
 import logging
 
 from routes import auth, conversations, messages, ai
+from routes import admin, admin
+from middleware.activity import ActivityLoggingMiddleware
 
 # ─────────────────────────────────────────────
 # Logging
@@ -53,6 +55,9 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Activity logging middleware (non-blocking, runs after CORS)
+app.add_middleware(ActivityLoggingMiddleware)
+
 # ─────────────────────────────────────────────
 # Global exception handler
 # ─────────────────────────────────────────────
@@ -71,6 +76,8 @@ app.include_router(auth.router)
 app.include_router(conversations.router)
 app.include_router(messages.router)
 app.include_router(ai.router)
+app.include_router(admin.router)
+app.include_router(admin.router)
 
 # ─────────────────────────────────────────────
 # Health check
@@ -103,6 +110,11 @@ if _FRONTEND_DIR.exists():
     app.mount("/app/css", StaticFiles(directory=str(_FRONTEND_DIR / "css")), name="css")
     app.mount("/app/js",  StaticFiles(directory=str(_FRONTEND_DIR / "js")),  name="js")
 
+    # Serve admin panel assets
+    _ADMIN_DIR = _FRONTEND_DIR / "admin"
+    if _ADMIN_DIR.exists():
+        app.mount("/admin-panel", StaticFiles(directory=str(_ADMIN_DIR), html=True), name="admin-static")
+
     @app.get("/app", include_in_schema=False)
     @app.get("/app/", include_in_schema=False)
     def serve_index():
@@ -115,3 +127,7 @@ if _FRONTEND_DIR.exists():
     @app.get("/app/signup", include_in_schema=False)
     def serve_signup():
         return FileResponse(str(_FRONTEND_DIR / "signup.html"))
+
+    @app.get("/app/admin", include_in_schema=False)
+    def serve_admin():
+        return FileResponse(str(_FRONTEND_DIR / "admin.html"))

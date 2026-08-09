@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — My_LLM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-icon">🛡️</span>
+      <div>
+        <div class="logo-title">My_LLM</div>
+        <div class="logo-sub">Admin Panel</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a class="nav-item active" data-page="dashboard" href="#">
+      <span>📊</span> Dashboard
+    </a>
+    <a class="nav-item" data-page="users" href="#">
+      <span>👥</span> Users
+    </a>
+    <a class="nav-item" data-page="activity" href="#">
+      <span>📡</span> Live Activity
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="admin-badge">🛡️ Administrator</div>
+    <button class="btn-logout" id="btnLogout">⏻ Sign Out</button>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+    <button class="btn-refresh" id="btnRefresh" title="Refresh data">🔄 Refresh</button>
+  </header>
+
+  <!-- ── DASHBOARD PAGE ── -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-users">—</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✨</div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-new">—</div>
+          <div class="stat-label">New Today</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-convs">—</div>
+          <div class="stat-label">Conversations</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-msgs">—</div>
+          <div class="stat-label">Total Messages</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🖼️</div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-imgs">—</div>
+          <div class="stat-label">Images Generated</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Recent Users</div>
+    <div class="table-wrap">
+      <table id="dash-users-table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Conversations</th><th>Last Active</th><th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="dash-users-body">
+          <tr><td colspan="5" class="loading-cell">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── USERS PAGE ── -->
+  <div class="page" id="page-users">
+    <div class="toolbar">
+      <input class="search-input" id="userSearch" type="text" placeholder="🔍  Search by name or email…" />
+    </div>
+    <div class="table-wrap">
+      <table id="users-table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Conversations</th><th>Last Active</th><th>Joined</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-body">
+          <tr><td colspan="6" class="loading-cell">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── ACTIVITY PAGE ── -->
+  <div class="page" id="page-activity">
+    <div class="section-title">Last 50 Messages Across All Users</div>
+    <div class="activity-list" id="activity-list">
+      <div class="loading-cell">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ── USER DETAIL MODAL ── -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalUserName">User Detail</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MESSAGES MODAL ── -->
+  <div class="modal-overlay" id="msgsModalOverlay">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h2 id="msgsModalTitle">Conversation</h2>
+        <button class="modal-close" id="msgsModalClose">✕</button>
+      </div>
+      <div class="modal-body" id="msgsModalBody"></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="admin.js"></script>
+</body>
+</html>
