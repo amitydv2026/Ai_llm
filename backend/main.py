@@ -9,9 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import logging
 
-from routes import auth, conversations, messages, ai
-from routes import admin, admin
-from middleware.activity import ActivityLoggingMiddleware
+from routes import auth, conversations, messages, ai, admin
 
 # ─────────────────────────────────────────────
 # Logging
@@ -34,29 +32,24 @@ app = FastAPI(
 )
 
 # ─────────────────────────────────────────────
-# CORS
+# CORS — must be first middleware
 # ─────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        # Local development
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        # GitHub Pages — replace YOUR_USERNAME with your GitHub username
-        "https://amitydv2026.github.io"
+        "https://amitydv2026.github.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
-
-# Activity logging middleware (non-blocking, runs after CORS)
-app.add_middleware(ActivityLoggingMiddleware)
 
 # ─────────────────────────────────────────────
 # Global exception handler
@@ -77,14 +70,12 @@ app.include_router(conversations.router)
 app.include_router(messages.router)
 app.include_router(ai.router)
 app.include_router(admin.router)
-app.include_router(admin.router)
 
 # ─────────────────────────────────────────────
 # Health check
 # ─────────────────────────────────────────────
 @app.get("/health", tags=["Health"])
 def health_check():
-    """Simple health-check endpoint for monitoring."""
     return {"status": "ok", "app": "My_LLM"}
 
 
@@ -94,23 +85,14 @@ def root():
 
 
 # ─────────────────────────────────────────────
-# Serve Frontend (Option 3)
-# Mounts the frontend/ folder so the entire app
-# is accessible from a single uvicorn process.
-#
-# Pages:
-#   http://localhost:8000/app          → chat
-#   http://localhost:8000/app/login    → login
-#   http://localhost:8000/app/signup   → signup
+# Serve Frontend static files
 # ─────────────────────────────────────────────
 _FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
 if _FRONTEND_DIR.exists():
-    # Serve static assets (css/, js/)
     app.mount("/app/css", StaticFiles(directory=str(_FRONTEND_DIR / "css")), name="css")
     app.mount("/app/js",  StaticFiles(directory=str(_FRONTEND_DIR / "js")),  name="js")
 
-    # Serve admin panel assets
     _ADMIN_DIR = _FRONTEND_DIR / "admin"
     if _ADMIN_DIR.exists():
         app.mount("/admin-panel", StaticFiles(directory=str(_ADMIN_DIR), html=True), name="admin-static")
@@ -127,7 +109,3 @@ if _FRONTEND_DIR.exists():
     @app.get("/app/signup", include_in_schema=False)
     def serve_signup():
         return FileResponse(str(_FRONTEND_DIR / "signup.html"))
-
-    @app.get("/app/admin", include_in_schema=False)
-    def serve_admin():
-        return FileResponse(str(_FRONTEND_DIR / "admin.html"))
