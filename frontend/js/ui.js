@@ -193,51 +193,52 @@ function scrollToBottom(container, smooth = true) {
 }
 
 // ─────────────────────────────────────────────
-// Message metadata: device + India time
+// Message metadata: location + India time
 // ─────────────────────────────────────────────
 
-function getDeviceName() {
-  const ua = navigator.userAgent;
+// Cache location so we only fetch once per session
+let _cachedLocation = null;
+let _locationFetching = false;
+let _locationCallbacks = [];
 
-  // ── Mobile devices ──
-  if (/iPhone/.test(ua)) {
-    const match = ua.match(/iPhone OS ([\d_]+)/);
-    const ver = match ? " (iOS " + match[1].replace(/_/g, ".") + ")" : "";
-    return "📱 iPhone" + ver;
-  }
-  if (/iPad/.test(ua)) return "📱 iPad";
-  if (/Samsung|SM-[A-Z]/i.test(ua)) {
-    const match = ua.match(/SM-([A-Z0-9]+)/i);
-    return "📱 Samsung " + (match ? match[1] : "Galaxy");
-  }
-  if (/Pixel (\d+)/i.test(ua)) {
-    const match = ua.match(/Pixel (\d+\s?[a-z]*)/i);
-    return "📱 Google Pixel " + (match ? match[1] : "");
-  }
-  if (/OnePlus/i.test(ua)) return "📱 OnePlus";
-  if (/Xiaomi|Redmi|MIUI/i.test(ua)) return "📱 Xiaomi";
-  if (/Huawei/i.test(ua)) return "📱 Huawei";
-  if (/OPPO/i.test(ua)) return "📱 OPPO";
-  if (/Vivo/i.test(ua)) return "📱 Vivo";
-  if (/Realme/i.test(ua)) return "📱 Realme";
-  if (/Android/.test(ua)) return "📱 Android";
+async function getUserLocation() {
+  // Return cached value immediately
+  if (_cachedLocation !== null) return _cachedLocation;
 
-  // ── Desktop OS ──
-  if (/Macintosh|Mac OS X/.test(ua)) {
-    if (/Chrome/.test(ua)) return "💻 Mac (Chrome)";
-    if (/Safari/.test(ua)) return "💻 Mac (Safari)";
-    return "💻 MacBook";
+  // If already fetching, wait for it
+  if (_locationFetching) {
+    return new Promise((resolve) => _locationCallbacks.push(resolve));
   }
-  if (/Windows NT 10/.test(ua)) return "🖥️ Windows 10/11";
-  if (/Windows NT/.test(ua)) return "🖥️ Windows";
-  if (/Linux/.test(ua)) return "🖥️ Linux";
-  if (/CrOS/.test(ua)) return "💻 Chromebook";
 
-  return "🌐 Unknown Device";
+  _locationFetching = true;
+  try {
+    // ip-api.com — free, no API key, works from browser
+    const res = await fetch("https://ip-api.com/json/?fields=city,regionName,status", {
+      cache: "force-cache",
+    });
+    const data = await res.json();
+
+    if (data.status === "success" && data.city) {
+      _cachedLocation = `📍 ${data.city}, ${data.regionName}`;
+    } else {
+      _cachedLocation = "📍 Unknown Location";
+    }
+  } catch {
+    _cachedLocation = "📍 Unknown Location";
+  }
+
+  _locationFetching = false;
+  // Resolve any waiting callers
+  _locationCallbacks.forEach(cb => cb(_cachedLocation));
+  _locationCallbacks = [];
+
+  return _cachedLocation;
 }
 
+// Pre-fetch location on page load so it's ready when first message arrives
+getUserLocation();
+
 function getIndiaTime(timestamp = null) {
-  // Use provided timestamp (from DB) or current time (for live responses)
   const date = timestamp ? new Date(timestamp) : new Date();
   return date.toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
@@ -253,9 +254,9 @@ function getIndiaTime(timestamp = null) {
 function buildMessageMeta(timestamp = null) {
   const meta = createElement("div", { className: "message-meta" });
 
-  const device = createElement("span", {
+  const locationEl = createElement("span", {
     className: "message-meta-device",
-    textContent: getDeviceName(),
+    textContent: _cachedLocation || "📍 Locating…",
   });
 
   const time = createElement("span", {
@@ -263,8 +264,16 @@ function buildMessageMeta(timestamp = null) {
     textContent: getIndiaTime(timestamp),
   });
 
-  meta.appendChild(device);
+  meta.appendChild(locationEl);
   meta.appendChild(time);
+
+  // If location not ready yet, update it once it arrives
+  if (!_cachedLocation) {
+    getUserLocation().then(loc => {
+      locationEl.textContent = loc;
+    });
+  }
+
   return meta;
 }
 
