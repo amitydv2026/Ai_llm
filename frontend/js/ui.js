@@ -202,36 +202,50 @@ let _locationFetching = false;
 let _locationCallbacks = [];
 
 async function getUserLocation() {
-  // Return cached value immediately
   if (_cachedLocation !== null) return _cachedLocation;
-
-  // If already fetching, wait for it
   if (_locationFetching) {
     return new Promise((resolve) => _locationCallbacks.push(resolve));
   }
 
   _locationFetching = true;
-  try {
-    // ip-api.com — free, no API key, works from browser
-    const res = await fetch("https://ip-api.com/json/?fields=city,regionName,status", {
-      cache: "force-cache",
-    });
-    const data = await res.json();
 
-    if (data.status === "success" && data.city) {
-      _cachedLocation = `📍 ${data.city}, ${data.regionName}`;
-    } else {
-      _cachedLocation = "📍 Unknown Location";
-    }
-  } catch {
-    _cachedLocation = "📍 Unknown Location";
+  // Try multiple free APIs in order until one works
+  const apis = [
+    async () => {
+      const r = await fetch("https://ipapi.co/json/");
+      const d = await r.json();
+      if (d.city && d.region) return `📍 ${d.city}, ${d.region}`;
+      return null;
+    },
+    async () => {
+      const r = await fetch("https://ipwho.is/");
+      const d = await r.json();
+      if (d.success && d.city) return `📍 ${d.city}, ${d.region}`;
+      return null;
+    },
+    async () => {
+      const r = await fetch("https://freeipapi.com/api/json");
+      const d = await r.json();
+      if (d.cityName && d.regionName) return `📍 ${d.cityName}, ${d.regionName}`;
+      return null;
+    },
+  ];
+
+  for (const api of apis) {
+    try {
+      const result = await api();
+      if (result) {
+        _cachedLocation = result;
+        break;
+      }
+    } catch { /* try next */ }
   }
 
+  if (!_cachedLocation) _cachedLocation = "📍 Location unavailable";
+
   _locationFetching = false;
-  // Resolve any waiting callers
   _locationCallbacks.forEach(cb => cb(_cachedLocation));
   _locationCallbacks = [];
-
   return _cachedLocation;
 }
 
