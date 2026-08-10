@@ -212,12 +212,6 @@ async function getUserLocation() {
   // Try multiple free APIs in order until one works
   const apis = [
     async () => {
-      const r = await fetch("https://ipapi.co/json/");
-      const d = await r.json();
-      if (d.city && d.region) return `📍 ${d.city}, ${d.region}`;
-      return null;
-    },
-    async () => {
       const r = await fetch("https://ipwho.is/");
       const d = await r.json();
       if (d.success && d.city) return `📍 ${d.city}, ${d.region}`;
@@ -227,6 +221,12 @@ async function getUserLocation() {
       const r = await fetch("https://freeipapi.com/api/json");
       const d = await r.json();
       if (d.cityName && d.regionName) return `📍 ${d.cityName}, ${d.regionName}`;
+      return null;
+    },
+    async () => {
+      const r = await fetch("https://get.geojs.io/v1/ip/geo.json");
+      const d = await r.json();
+      if (d.city && d.region) return `📍 ${d.city}, ${d.region}`;
       return null;
     },
   ];
