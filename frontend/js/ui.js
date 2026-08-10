@@ -196,20 +196,43 @@ function scrollToBottom(container, smooth = true) {
 // Message metadata: location + India time
 // ─────────────────────────────────────────────
 
-// Cache location so we only fetch once per session
+// ─────────────────────────────────────────────
+// Message metadata: location + India time
+// ─────────────────────────────────────────────
+
 let _cachedLocation = null;
 let _locationFetching = false;
 let _locationCallbacks = [];
 
-async function getUserLocation() {
-  if (_cachedLocation !== null) return _cachedLocation;
-  if (_locationFetching) {
-    return new Promise((resolve) => _locationCallbacks.push(resolve));
-  }
+// ── Step 1: Try GPS (accurate, needs permission) ──
+function getGPSLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(null); return; }
 
-  _locationFetching = true;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          // Reverse geocode using OpenStreetMap Nominatim (free, no API key)
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { "Accept-Language": "en" } }
+          );
+          const d = await r.json();
+          const city  = d.address?.city || d.address?.town || d.address?.village || d.address?.county || "";
+          const state = d.address?.state || "";
+          if (city) resolve(`📍 ${city}, ${state}`);
+          else resolve(null);
+        } catch { resolve(null); }
+      },
+      () => resolve(null),        // user denied or timeout
+      { timeout: 5000, maximumAge: 300000 }
+    );
+  });
+}
 
-  // Try multiple free APIs in order until one works
+// ── Step 2: Fallback to IP geolocation ──
+async function getIPLocation() {
   const apis = [
     async () => {
       const r = await fetch("https://ipwho.is/");
@@ -234,22 +257,33 @@ async function getUserLocation() {
   for (const api of apis) {
     try {
       const result = await api();
-      if (result) {
-        _cachedLocation = result;
-        break;
-      }
+      if (result) return result;
     } catch { /* try next */ }
   }
+  return null;
+}
 
-  if (!_cachedLocation) _cachedLocation = "📍 Location unavailable";
+async function getUserLocation() {
+  if (_cachedLocation !== null) return _cachedLocation;
+  if (_locationFetching) {
+    return new Promise((resolve) => _locationCallbacks.push(resolve));
+  }
 
+  _locationFetching = true;
+
+  // Try GPS first (most accurate), fall back to IP
+  let location = await getGPSLocation();
+  if (!location) location = await getIPLocation();
+  if (!location) location = "📍 Location unavailable";
+
+  _cachedLocation = location;
   _locationFetching = false;
   _locationCallbacks.forEach(cb => cb(_cachedLocation));
   _locationCallbacks = [];
   return _cachedLocation;
 }
 
-// Pre-fetch location on page load so it's ready when first message arrives
+// Pre-fetch on load — GPS permission popup appears here
 getUserLocation();
 
 function getIndiaTime(timestamp = null) {
